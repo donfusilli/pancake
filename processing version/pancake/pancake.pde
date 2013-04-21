@@ -16,8 +16,14 @@ boolean clickedRunBox = false;
 boolean overRunBox = false;
 int xRunBox = xDim;
 int yRunBox = (yDim-menuDim);
+boolean clickedCircleBox = false;
+boolean overCircleBox = false;
+int xCircleBox = xDim;
+int yCircleBox = menuDim;
+
 int backColor = 200; //color of background
 boolean drawingLine;
+boolean drawingCircle;
 boolean sendingData;
 int xLineAnchor;
 int yLineAnchor;
@@ -25,6 +31,7 @@ int oldXMouse = 0;
 int oldYMouse = 0;
 ArrayList <Shape> shapes = new ArrayList <Shape>(); 
 Line currLine;
+Circle currCircle;
 
 interface Shape{
   void display();
@@ -70,12 +77,27 @@ class Circle implements Shape{
     y1 = y;
   }
   
+  void setRad(int r){
+    rad = r;
+  }
+  
   String getCordString(){
     return ("C,"+x1+","+y1+","+rad+".");
   }
  
   void display(){
+    fill(c);
     ellipse(x1,y1,rad*2,rad*2); 
+  }
+  
+  int getX(){
+    return x1;
+  }
+  int getY(){
+    return y1;
+  }
+  int getRad(){
+    return rad;
   }
 }
 
@@ -117,6 +139,28 @@ void lineBox(){
   strokeWeight(1);
 }
 
+void circleBox(){
+  //Test if cursor is over the box
+  if (mouseX > xCircleBox && mouseX < xCircleBox+menuDim &&
+     mouseY > yCircleBox && mouseY < yCircleBox+menuDim){
+       overCircleBox = true;
+     }
+  else{
+    overCircleBox = false; 
+  }
+  if(clickedCircleBox){
+    fill(225,255,0); 
+  }
+  else{
+    fill(backColor);
+  }
+  stroke(c);
+  rect(xCircleBox,yCircleBox,menuDim,menuDim);
+  fill(c);
+  ellipse(xCircleBox+menuDim/2,yCircleBox+menuDim/2,
+          menuDim/2, menuDim/2);  
+}
+
 void runBox(){
   //Test if cursor is over the box
   if(mouseX > xRunBox && mouseX < xRunBox+menuDim &&
@@ -149,6 +193,7 @@ void runBox(){
 void draw(){
   defaultSet();
   lineBox();
+  circleBox();
   runBox();
   stroke(c);
   
@@ -161,17 +206,35 @@ void draw(){
     currLine.setSecondPoint(mouseX,mouseY);
     currLine.display();
   }
+  if(mousePressed && drawingCircle){
+    currCircle.setRad(calculateRad(mouseX,mouseY));
+    currCircle.display();
+  }
 }
 
 void mousePressed(){
   if(overLineBox && !clickedRunBox){
     clickedLineBox = !clickedLineBox;
+    if(clickedCircleBox && clickedLineBox){
+      clickedCircleBox = false;
+    }
   }
   else if(clickedLineBox && !drawingLine && mouseX <= xDim){
     //start drawing line
     currLine = new Line(mouseX,mouseY);
     drawingLine = true;
   }
+  else if(overCircleBox && !clickedRunBox){
+    clickedCircleBox = !clickedCircleBox;
+    if(clickedCircleBox && clickedLineBox){
+      clickedLineBox = false;
+    }  
+  }
+  else if(clickedCircleBox && !drawingCircle && mouseX <= xDim){
+    //start drawing circle
+    currCircle = new Circle(mouseX,mouseY);
+    drawingCircle = true; 
+  }  
   else if(overRunBox){
     clickedRunBox = true; 
     clickedLineBox = false;
@@ -186,6 +249,12 @@ void mouseDragged(){
     currLine.setSecondPoint(mouseX,mouseY);
     draw();
     currLine.display();   
+  }
+  else if(drawingCircle){
+    int rad = calculateRad(mouseX,mouseY);
+    currCircle.setRad(rad);
+    draw();
+    currCircle.display();
   } 
 }
 
@@ -219,6 +288,37 @@ void mouseReleased(){
     drawingLine = false;
     println(currLine.getCordString());
   }
+  else if(drawingCircle){
+    int xLeft = currCircle.getX()-currCircle.getRad();
+    int xRight = currCircle.getX()+currCircle.getRad();
+    int yUp = currCircle.getY()-currCircle.getRad();
+    int yDown = currCircle.getY()+currCircle.getRad();
+    int newRad = calculateRad(mouseX,mouseY);
+    
+    if(xLeft < 0){
+      //off left side of screen
+      newRad = min(newRad,currCircle.getX());
+    }
+    else if(xRight > xDim){
+      //off right side of drawing pane
+      newRad = min(newRad,xDim-currCircle.getX());
+    }
+    if (yUp < 0){
+      //off top of screen
+      newRad = min(newRad,currCircle.getY());
+    }
+    else if(yDown > yDim){
+      //off bottom of screen
+      newRad = min(newRad,yDim-currCircle.getY());
+    }
+    if(newRad > currCircle.getX() || newRad > currCircle.getY()){
+      newRad = min(currCircle.getX(), currCircle.getY()); 
+    }
+    currCircle.setRad(newRad);
+    shapes.add(currCircle);
+    drawingCircle = false;
+    println(currCircle.getCordString()); 
+  }
 }
 
 void sendData(){
@@ -236,4 +336,13 @@ void sendData(){
     while((port.readStringUntil(DELIMITER)) == null); 
   }
   clickedRunBox = false; 
+}
+
+int calculateRad(int x, int y){
+  float centerX = float(currCircle.getX());
+  float centerY = float(currCircle.getY());
+  float delX = x - centerX;
+  float delY = y - centerY;
+  float rad = sqrt(sq(delX)+sq(delY));
+  return int(rad);
 }
