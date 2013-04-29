@@ -351,16 +351,16 @@ void mouseReleased(){
 void sendData(){
   //send first set of data
   println(Serial.list());
-  port = new Serial(this,Serial.list()[0],57600);
+  port = new Serial(this,Serial.list()[0],9600);
   Shape s = shapes.get(0);
   port.write(s.getCordString());
   //wait for response
-  while((port.readStringUntil(DELIMITER)) == null);
+  while(port.available() <= 0);
   //send next set of data
   for(int i=1; i<shapes.size();i++){
     s = shapes.get(i);
     port.write(s.getCordString());
-    while((port.readStringUntil(DELIMITER)) == null); 
+    while(port.available() <= 0);
   }
   clickedRunBox = false; 
 }
