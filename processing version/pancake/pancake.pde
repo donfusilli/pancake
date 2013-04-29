@@ -24,12 +24,15 @@ boolean clickedUndoBox = false;
 boolean overUndoBox = false;
 int xUndoBox = xDim;
 int yUndoBox = 2*menuDim;
+boolean clickedClearBox = false;
+boolean overClearBox = false;
+int xClearBox = xDim;
+int yClearBox = 3*menuDim;
 
 int backColor = 200; //color of background
 boolean drawingLine;
 boolean drawingCircle;
 boolean sendingData;
-boolean undoing;
 int xLineAnchor;
 int yLineAnchor;
 int oldXMouse = 0;
@@ -183,9 +186,33 @@ void undoBox(){
  else{
    fill(backColor);
  }
- fill(c);
+ stroke(c);
+ rect(xUndoBox,yUndoBox,menuDim,menuDim);
+ fill(0);
  textSize(32);
- text("UNDO",
+ text("UNDO",xUndoBox+(menuDim/8),yUndoBox+(7*menuDim/12));
+}
+
+void clearBox(){
+  //test if the cursor is over the box
+  if(mouseX > xClearBox && mouseX < xClearBox+menuDim &&
+     mouseY > yClearBox && mouseY < yClearBox+menuDim){
+       overClearBox = true; 
+     }
+  else{
+     overClearBox = false; 
+  }
+  if(clickedClearBox){
+    fill(225,225,0); 
+  }
+  else{
+    fill(backColor); 
+  }
+  stroke(c);
+  rect(xClearBox,yClearBox,menuDim,menuDim);
+  fill(0);
+  textSize(32);
+  text("CLEAR",(xClearBox+menuDim/8),yClearBox+(7*menuDim/12));
 }
 
 void runBox(){
@@ -222,6 +249,8 @@ void draw(){
   lineBox();
   circleBox();
   runBox();
+  undoBox();
+  clearBox();
   stroke(c);
   
   for (int i = 0; i < shapes.size(); i++){
@@ -242,9 +271,9 @@ void draw(){
 void mousePressed(){
   if(overLineBox && !clickedRunBox){
     clickedLineBox = !clickedLineBox;
-    if(clickedCircleBox && clickedLineBox){
-      clickedCircleBox = false;
-    }
+    clickedCircleBox = false;
+    clickedRunBox = false;
+    clickedUndoBox = false;
   }
   else if(clickedLineBox && !drawingLine && mouseX <= xDim){
     //start drawing line
@@ -253,9 +282,9 @@ void mousePressed(){
   }
   else if(overCircleBox && !clickedRunBox){
     clickedCircleBox = !clickedCircleBox;
-    if(clickedCircleBox && clickedLineBox){
-      clickedLineBox = false;
-    }  
+    clickedLineBox = false;
+    clickedRunBox = false;
+    clickedUndoBox = false;  
   }
   else if(clickedCircleBox && !drawingCircle && mouseX <= xDim){
     //start drawing circle
@@ -265,9 +294,30 @@ void mousePressed(){
   else if(overRunBox){
     clickedRunBox = true; 
     clickedLineBox = false;
+    clickedCircleBox = false;
+    clickedUndoBox = false;
     draw();
     println("sending data");
     sendData();
+  }
+  else if(overUndoBox && !clickedRunBox){
+    //clickedUndoBox = !clickedUndoBox;
+    clickedRunBox = false;
+    clickedLineBox = false;
+    clickedCircleBox = false;
+    int endList = shapes.size()-1;
+    if(endList >=0){
+      shapes.remove(endList);
+    }
+    draw();
+  }
+  else if(overClearBox && !clickedRunBox){
+    clickedRunBox = false;
+    clickedLineBox = false;
+    clickedCircleBox = false;
+    clickedUndoBox = false;
+    shapes.clear();
+    draw(); 
   }
 }
 
