@@ -20,11 +20,16 @@ boolean clickedCircleBox = false;
 boolean overCircleBox = false;
 int xCircleBox = xDim;
 int yCircleBox = menuDim;
+boolean clickedUndoBox = false;
+boolean overUndoBox = false;
+int xUndoBox = xDim;
+int yUndoBox = 2*menuDim;
 
 int backColor = 200; //color of background
 boolean drawingLine;
 boolean drawingCircle;
 boolean sendingData;
+boolean undoing;
 int xLineAnchor;
 int yLineAnchor;
 int oldXMouse = 0;
@@ -50,7 +55,9 @@ class Line implements Shape{
     y2 = y; 
   }
   void display(){
+    strokeWeight(4);
     line(x1,y1,x2,y2);
+    strokeWeight(1);
   } 
   String getCordString(){
     return ("L,"+x1+","+y1+","+x2+","+y2+".");
@@ -159,6 +166,26 @@ void circleBox(){
   fill(c);
   ellipse(xCircleBox+menuDim/2,yCircleBox+menuDim/2,
           menuDim/2, menuDim/2);  
+}
+
+void undoBox(){
+ //test if cursor is over the box
+ if(mouseX > xUndoBox && mouseX < xUndoBox+menuDim &&
+    mouseY > yUndoBox && mouseY < yUndoBox+menuDim){
+      overUndoBox = true;
+    }
+ else{
+    overUndoBox = false;
+ }
+ if(clickedUndoBox){
+   fill(225,225,0);
+ } 
+ else{
+   fill(backColor);
+ }
+ fill(c);
+ textSize(32);
+ text("UNDO",
 }
 
 void runBox(){
