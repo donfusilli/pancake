@@ -1,7 +1,7 @@
 
 
 const int DELIMITER = '.';
-const int NEXT_TOKEN = 'N.';
+const int NEXT_TOKEN = 'N';
 
 int numPoints;
 const int xDim = 1024; //first dim = # steps in x direction
@@ -11,12 +11,23 @@ int linePoints[xDim][2]; //first index is point number
                          
 String coordString;
 
+#define DIR_PIN1 2
+#define STEP_PIN1 3
+
+#define DIR_PIN2 5
+#define STEP_PIN2 6
+
 void setup(){
   Serial.begin(9600);
   setLinePoints(0,1,6,4);
   for (int i = 0; i<numPoints; i++){
      Serial.println(("("+String(linePoints[i][0]) + "," + String(linePoints[i][1]) + ")"));
   }
+  
+  pinMode(DIR_PIN1, OUTPUT); 
+  pinMode(STEP_PIN1, OUTPUT); 
+  pinMode(DIR_PIN2, OUTPUT); 
+  pinMode(STEP_PIN2, OUTPUT);
 }
 
 
@@ -25,7 +36,6 @@ if(Serial.available() > 0){
     char c = Serial.read();
     coordString += c;
     if(c == '.'){
-      coordString = "";
       String c1 = getValue(coordString, ',', 0);
       if(c1 == "L"){
         // do stuff for line
@@ -43,6 +53,7 @@ if(Serial.available() > 0){
         //do nothing
       }
       Serial.println(NEXT_TOKEN);
+      coordString = "";
     } 
   }
   else{
@@ -51,10 +62,8 @@ if(Serial.available() > 0){
 }
 
 void drawLine(int x1, int y1, int x2, int y2){
-   //move to x1,y1
-   //turn on batter
-   //move to x2,y2
-   //turn off batter
+   // not sure how linePoints works
+   // move motors here
 }
 
 // from h-ttp://stackoverflow.com/questions/9072320/arduino-split-string-into-string-array
@@ -105,4 +114,42 @@ void setLinePoints(int x0, int y0, int x1, int y1){
       pointNum++;
     }  
   }
+}
+
+// rotate (degrees) method for motor 1
+void rotateDeg1(float deg, float spd){ 
+  //rotate a specific number of degrees (negitive for reverse movement)
+  //speed is any number from .01 -> 1 with 1 being fastest - Slower is stronger
+  int dir = (deg > 0)? HIGH:LOW;
+  digitalWrite(DIR_PIN1, dir); 
+
+  int steps = abs(deg)*(1/0.225);
+  float motorDelay = (1/spd) * 70;
+
+  for(int i=0; i < steps; i++){ 
+    digitalWrite(STEP_PIN1, HIGH); 
+    delayMicroseconds(motorDelay); 
+
+    digitalWrite(STEP_PIN1, LOW); 
+    delayMicroseconds(motorDelay); 
+  } 
+}
+
+// rotate (degrees) method for motor 2
+void rotateDeg2(float deg, float spd){ 
+  //rotate a specific number of degrees (negitive for reverse movement)
+  //speed is any number from .01 -> 1 with 1 being fastest - Slower is stronger
+  int dir = (deg > 0)? HIGH:LOW;
+  digitalWrite(DIR_PIN2, dir); 
+
+  int steps = abs(deg)*(1/0.225);
+  float motorDelay = (1/spd) * 70;
+
+  for(int i=0; i < steps; i++){ 
+    digitalWrite(STEP_PIN2, HIGH); 
+    delayMicroseconds(motorDelay); 
+
+    digitalWrite(STEP_PIN2, LOW); 
+    delayMicroseconds(motorDelay); 
+  } 
 }
