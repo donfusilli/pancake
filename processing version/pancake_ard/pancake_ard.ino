@@ -8,18 +8,22 @@ const int xDim = 1024; //first dim = # steps in x direction
 int linePoints[xDim][2]; //first index is point number
                          //second index: 0 = x, 1 = y of point
                          //ONLY read spots after they have been written to. Otherwise they could contain garbage
+
+int batterX; //x coordinate of batter dispenser
+int batterY; //y coordinate of batter dispenser
                          
 String coordString;
 
-#define DIR_PIN1 2
-#define STEP_PIN1 3
+#define DIR_PIN_X 2
+#define STEP_PIN_X 3
 
-#define DIR_PIN2 5
-#define STEP_PIN2 6
+#define DIR_PIN_Y 5
+#define STEP_PIN_Y 6
 
 void setup(){
   Serial.begin(9600);
-  setLinePoints(0,1,6,4);
+  Serial.println("test");
+  /*setLinePoints(0,1,6,4);
   for (int i = 0; i<numPoints; i++){
      Serial.println(("("+String(linePoints[i][0]) + "," + String(linePoints[i][1]) + ")"));
   }
@@ -28,18 +32,26 @@ void setup(){
   pinMode(STEP_PIN1, OUTPUT); 
   pinMode(DIR_PIN2, OUTPUT); 
   pinMode(STEP_PIN2, OUTPUT);
+  */
 }
 
 
 void loop(){
+  //Serial.println("I am in a loop");
 if(Serial.available() > 0){
+    //Serial.print(Serial.available());
     char c = Serial.read();
+    //Serial.print(Serial.available());
+    Serial.print(".");
     coordString += c;
+    Serial.print(coordString);
     if(c == '.'){
       String c1 = getValue(coordString, ',', 0);
       if(c1 == "L"){
         // do stuff for line
         int x1 = getValue(coordString, ',', 1).toInt();
+        int blah = x1*5;
+        //Serial.println(String(blah));
         int y1 = getValue(coordString, ',', 2).toInt();
         int x2 = getValue(coordString, ',', 3).toInt();
         int y2 = getValue(coordString, ',', 4).toInt();
@@ -57,7 +69,7 @@ if(Serial.available() > 0){
     } 
   }
   else{
-    Serial.println("Nothing received.");
+    Serial.print("Nothing received.");
   }
 }
 
@@ -116,40 +128,54 @@ void setLinePoints(int x0, int y0, int x1, int y1){
   }
 }
 
-// rotate (degrees) method for motor 1
-void rotateDeg1(float deg, float spd){ 
-  //rotate a specific number of degrees (negitive for reverse movement)
+//rotate steps for xMotor
+void rotateX(int steps, float spd){ 
+  //rotate a specific number of microsteps (8 microsteps per step) - (negitive for reverse movement)
   //speed is any number from .01 -> 1 with 1 being fastest - Slower is stronger
-  int dir = (deg > 0)? HIGH:LOW;
-  digitalWrite(DIR_PIN1, dir); 
+  int dir = (steps > 0)? HIGH:LOW;
+  steps = abs(steps);
 
-  int steps = abs(deg)*(1/0.225);
+  digitalWrite(DIR_PIN_X,dir); 
+
   float motorDelay = (1/spd) * 70;
 
   for(int i=0; i < steps; i++){ 
-    digitalWrite(STEP_PIN1, HIGH); 
+    digitalWrite(STEP_PIN_X, HIGH); 
     delayMicroseconds(motorDelay); 
 
-    digitalWrite(STEP_PIN1, LOW); 
+    digitalWrite(STEP_PIN_X, LOW); 
     delayMicroseconds(motorDelay); 
   } 
-}
+} 
 
-// rotate (degrees) method for motor 2
-void rotateDeg2(float deg, float spd){ 
-  //rotate a specific number of degrees (negitive for reverse movement)
+void rotateY(int steps, float spd){ 
+  //rotate a specific number of microsteps (8 microsteps per step) - (negitive for reverse movement)
   //speed is any number from .01 -> 1 with 1 being fastest - Slower is stronger
-  int dir = (deg > 0)? HIGH:LOW;
-  digitalWrite(DIR_PIN2, dir); 
+  int dir = (steps > 0)? HIGH:LOW;
+  steps = abs(steps);
 
-  int steps = abs(deg)*(1/0.225);
+  digitalWrite(DIR_PIN_Y,dir); 
+
   float motorDelay = (1/spd) * 70;
 
   for(int i=0; i < steps; i++){ 
-    digitalWrite(STEP_PIN2, HIGH); 
+    digitalWrite(STEP_PIN_Y, HIGH); 
     delayMicroseconds(motorDelay); 
 
-    digitalWrite(STEP_PIN2, LOW); 
+    digitalWrite(STEP_PIN_Y, LOW); 
     delayMicroseconds(motorDelay); 
   } 
+} 
+
+void moveToPoint(int x, int y){
+  int delX = x-batterX;
+  int delY = y-batterY;
+  int xSpeed = .5; //range 0.01 slowest to 1 fastest
+  int ySpeed = .5; //range 0.01 slowest to 1 fastest
+  if(delX != 0){
+    rotateX(delX,xSpeed);
+  }
+  if(delY != 0){
+    rotateY(delY,ySpeed);
+  }  
 }

@@ -402,16 +402,25 @@ void sendData(){
   //send first set of data
   println(Serial.list());
   port = new Serial(this,Serial.list()[0],9600);
+  //println("hello world");
   Shape s = shapes.get(0);
+  //println("squirrel");
   port.write(s.getCordString());
+  println("42");
   //wait for response
-  while(port.available() <= 0);
+  while(port.available() <= 0){
+   //println("waiting"); 
+  }
+  int delimiter = '.';
+  //while(port.readStringUntil(delimiter)== null);
+  println("test 123");
   //send next set of data
   for(int i=1; i<shapes.size();i++){
     s = shapes.get(i);
     port.write(s.getCordString());
     while(port.available() <= 0);
   }
+  println("done printing");
   clickedRunBox = false; 
 }
 
