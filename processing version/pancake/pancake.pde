@@ -1,7 +1,6 @@
+
 import processing.serial.*;
 Serial port;
-int DELIMITER = '.';
-int NEXT_TOKEN = 'N';
 
 int xDim = 800;//x dimension of griddle
 int yDim = 600;//y dimension of griddle
@@ -40,6 +39,9 @@ int oldYMouse = 0;
 ArrayList <Shape> shapes = new ArrayList <Shape>(); 
 Line currLine;
 Circle currCircle;
+
+boolean readyToSend = false;
+String response = null;
 
 interface Shape{
   void display();
@@ -113,6 +115,14 @@ class Circle implements Shape{
 
 void setup(){
   defaultSet();
+  // list all the available serial ports
+  println(Serial.list());
+  // open the port you are using at the rate you want
+  port = new Serial(this,Serial.list()[0],9600);
+  //port.clear();
+  //response = port.readStringUntil(46);
+  //response = null;
+  port.bufferUntil(46);
 }
 
 void defaultSet(){
@@ -266,6 +276,11 @@ void draw(){
     currCircle.setRad(calculateRad(mouseX,mouseY));
     currCircle.display();
   }
+  
+  if(readyToSend){
+    sendData();
+  }
+
 }
 
 void mousePressed(){
@@ -298,7 +313,7 @@ void mousePressed(){
     clickedUndoBox = false;
     draw();
     println("sending data");
-    sendData();
+    readyToSend = true;
   }
   else if(overUndoBox && !clickedRunBox){
     //clickedUndoBox = !clickedUndoBox;
@@ -399,29 +414,21 @@ void mouseReleased(){
 }
 
 void sendData(){
-  //send first set of data
-  println(Serial.list());
-  port = new Serial(this,Serial.list()[0],9600);
-  //println("hello world");
-  Shape s = shapes.get(0);
-  //println("squirrel");
-  port.write(s.getCordString());
-  println("42");
-  //wait for response
-  while(port.available() <= 0){
-   //println("waiting"); 
+  for(int i=0; i<shapes.size(); i++){
+    Shape s = shapes.get(i);
+    if(s != null){
+      port.write(s.getCordString());
+      while(port.available() <= 0);
+      response = port.readStringUntil(46);
+      if(response != null){
+        println(response);
+      }
+      //shapes.remove(i);
+    }
   }
-  int delimiter = '.';
-  //while(port.readStringUntil(delimiter)== null);
-  println("test 123");
-  //send next set of data
-  for(int i=1; i<shapes.size();i++){
-    s = shapes.get(i);
-    port.write(s.getCordString());
-    while(port.available() <= 0);
-  }
-  println("done printing");
+  
   clickedRunBox = false; 
+  //readyToSend = false;
 }
 
 int calculateRad(int x, int y){

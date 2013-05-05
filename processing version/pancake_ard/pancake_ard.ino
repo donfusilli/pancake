@@ -22,12 +22,8 @@ String coordString;
 
 void setup(){
   Serial.begin(9600);
-  Serial.println("test");
-  /*setLinePoints(0,1,6,4);
-  for (int i = 0; i<numPoints; i++){
-     Serial.println(("("+String(linePoints[i][0]) + "," + String(linePoints[i][1]) + ")"));
-  }
   
+  /*
   pinMode(DIR_PIN1, OUTPUT); 
   pinMode(STEP_PIN1, OUTPUT); 
   pinMode(DIR_PIN2, OUTPUT); 
@@ -37,26 +33,28 @@ void setup(){
 
 
 void loop(){
-  //Serial.println("I am in a loop");
-if(Serial.available() > 0){
-    //Serial.print(Serial.available());
+  if(Serial.available() > 0){
+    //Serial.println("Got something.");
+    
     char c = Serial.read();
-    //Serial.print(Serial.available());
-    Serial.print(".");
+    //Serial.println(c);
     coordString += c;
-    Serial.print(coordString);
+    
     if(c == '.'){
       String c1 = getValue(coordString, ',', 0);
       if(c1 == "L"){
         // do stuff for line
         int x1 = getValue(coordString, ',', 1).toInt();
-        int blah = x1*5;
-        //Serial.println(String(blah));
         int y1 = getValue(coordString, ',', 2).toInt();
         int x2 = getValue(coordString, ',', 3).toInt();
         int y2 = getValue(coordString, ',', 4).toInt();
         
-        setLinePoints(x1,y1,x2,y2);        
+        //setLinePoints(x1,y1,x2,y2);    
+        Serial.println(x1); Serial.print('.');
+        Serial.println(y1); Serial.print('.');
+        Serial.println(x2); Serial.print('.');
+        Serial.println(y2); Serial.print('.');
+            
       }
       else if(c1 == "C"){
         // do stuff for circle
@@ -64,18 +62,18 @@ if(Serial.available() > 0){
       else{
         //do nothing
       }
-      Serial.println(NEXT_TOKEN);
+      //Serial.println(NEXT_TOKEN);
       coordString = "";
     } 
+    
   }
+  /*
   else{
-    Serial.print("Nothing received.");
+    Serial.println("Nothing received.");
   }
-}
-
-void drawLine(int x1, int y1, int x2, int y2){
-   // not sure how linePoints works
-   // move motors here
+  */
+   delay(400);
+   //Serial.println(NEXT_TOKEN);
 }
 
 // from h-ttp://stackoverflow.com/questions/9072320/arduino-split-string-into-string-array
