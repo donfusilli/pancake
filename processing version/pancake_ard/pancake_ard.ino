@@ -37,13 +37,12 @@ void setup(){
 
 void loop(){
   if(Serial.available() > 0){
-    Serial.println("Got something.");
+    //Serial.println("Got something.");
     
     char c = Serial.read();
-    //Serial.println(c);
+    //Serial.println(c); Serial.print('.');
     coordString += c;
-    digitalWrite(ledPin, HIGH);
-    /*
+    
     if(c == '.'){
       String c1 = getValue(coordString, ',', 0);
       if(c1 == "L"){
@@ -69,8 +68,7 @@ void loop(){
       //Serial.println(NEXT_TOKEN);
       coordString = "";
     } 
-    digitalWrite(ledPin, LOW);
-    */
+    
   }
   /*
   else{

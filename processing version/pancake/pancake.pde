@@ -119,10 +119,11 @@ void setup(){
   println(Serial.list());
   // open the port you are using at the rate you want
   port = new Serial(this,Serial.list()[0],9600);
-  //port.clear();
-  //response = port.readStringUntil(46);
-  //response = null;
+  port.clear();
+  response = port.readStringUntil(46);
+  response = null;
   port.bufferUntil(46);
+  port.readStringUntil(46);
 }
 
 void defaultSet(){
@@ -414,19 +415,15 @@ void mouseReleased(){
 }
 
 void sendData(){
-  Shape shape1 = shapes.get(0);
+    Shape shape1 = shapes.get(0);
   
     if(shape1 != null){
-      println("DEBUG1");
       port.write(shape1.getCordString());
-      println("DEBUG2");
       while(port.available() <= 0);
-      println("DEBUG3");
       response = port.readStringUntil(46);
-      println("DEBUG4");
-      //if(response != null){
+      if(response != null){
         println(response);
-      //}
+      }
       //shapes.remove(i);
     }
     /*
