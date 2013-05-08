@@ -414,7 +414,23 @@ void mouseReleased(){
 }
 
 void sendData(){
-  for(int i=0; i<shapes.size(); i++){
+  Shape shape1 = shapes.get(0);
+  
+    if(shape1 != null){
+      println("DEBUG1");
+      port.write(shape1.getCordString());
+      println("DEBUG2");
+      while(port.available() <= 0);
+      println("DEBUG3");
+      response = port.readStringUntil(46);
+      println("DEBUG4");
+      //if(response != null){
+        println(response);
+      //}
+      //shapes.remove(i);
+    }
+    /*
+  for(int i=1; i<shapes.size(); i++){
     Shape s = shapes.get(i);
     if(s != null){
       port.write(s.getCordString());
@@ -426,7 +442,7 @@ void sendData(){
       //shapes.remove(i);
     }
   }
-  
+  */
   clickedRunBox = false; 
   //readyToSend = false;
 }

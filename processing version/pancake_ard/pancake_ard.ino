@@ -20,9 +20,12 @@ String coordString;
 #define DIR_PIN_Y 5
 #define STEP_PIN_Y 6
 
+int ledPin = 13;
+
 void setup(){
   Serial.begin(9600);
-  
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
   /*
   pinMode(DIR_PIN1, OUTPUT); 
   pinMode(STEP_PIN1, OUTPUT); 
@@ -34,12 +37,13 @@ void setup(){
 
 void loop(){
   if(Serial.available() > 0){
-    //Serial.println("Got something.");
+    Serial.println("Got something.");
     
     char c = Serial.read();
     //Serial.println(c);
     coordString += c;
-    
+    digitalWrite(ledPin, HIGH);
+    /*
     if(c == '.'){
       String c1 = getValue(coordString, ',', 0);
       if(c1 == "L"){
@@ -65,7 +69,8 @@ void loop(){
       //Serial.println(NEXT_TOKEN);
       coordString = "";
     } 
-    
+    digitalWrite(ledPin, LOW);
+    */
   }
   /*
   else{
