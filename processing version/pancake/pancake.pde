@@ -424,7 +424,7 @@ void sendData(){
       if(response != null){
         println(response);
       }
-      //shapes.remove(i);
+      shapes.remove(0);
     }
     /*
   for(int i=1; i<shapes.size(); i++){
@@ -440,6 +440,7 @@ void sendData(){
     }
   }
   */
+  println("Done with shapes");
   clickedRunBox = false; 
   //readyToSend = false;
 }

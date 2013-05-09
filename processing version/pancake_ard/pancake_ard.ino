@@ -1,16 +1,17 @@
 
-
-const int DELIMITER = '.';
-const int NEXT_TOKEN = 'N';
+//const int DELIMITER = '.';
+//const int NEXT_TOKEN = 'N';
 
 int numPoints;
-const int xDim = 1024; //first dim = # steps in x direction
+const int xDim = 5600; //total number of steps in x-direction (long)
+const int yDim = 2400; // total number of steps in y-direction (short)
+
 int linePoints[xDim][2]; //first index is point number
                          //second index: 0 = x, 1 = y of point
                          //ONLY read spots after they have been written to. Otherwise they could contain garbage
 
-int batterX; //x coordinate of batter dispenser
-int batterY; //y coordinate of batter dispenser
+int batterX = 0;; //x coordinate of batter dispenser
+int batterY = 0; //y coordinate of batter dispenser
                          
 String coordString;
 
@@ -20,18 +21,13 @@ String coordString;
 #define DIR_PIN_Y 5
 #define STEP_PIN_Y 6
 
-int ledPin = 13;
-
 void setup(){
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
-  /*
-  pinMode(DIR_PIN1, OUTPUT); 
-  pinMode(STEP_PIN1, OUTPUT); 
-  pinMode(DIR_PIN2, OUTPUT); 
-  pinMode(STEP_PIN2, OUTPUT);
-  */
+  pinMode(DIR_PIN_X, OUTPUT); 
+  pinMode(STEP_PIN_X, OUTPUT); 
+  pinMode(DIR_PIN_Y, OUTPUT); 
+  pinMode(STEP_PIN_Y, OUTPUT);
+  
 }
 
 
@@ -51,32 +47,45 @@ void loop(){
         int y1 = getValue(coordString, ',', 2).toInt();
         int x2 = getValue(coordString, ',', 3).toInt();
         int y2 = getValue(coordString, ',', 4).toInt();
+        x1 = map(x1, 0, 800, 0, 5600);
+        y1 = map(y1, 0, 600, 0, 2400);
+        x2 = map(x2, 0, 800, 0, 5600);
+        y2 = map(y2, 0, 600, 0, 2400);
         
-        //setLinePoints(x1,y1,x2,y2);    
+        setLinePoints(x1,y1,x2,y2); 
+        // move to first point on line
+        moveToPoint(linePoints[0][0], linePoints[0][1]);
+        // "turn on" batter
+        for(int k = 1; k < numPoints; k++){
+          int tempx = linePoints[k][0];
+          int tempy = linePoints[k][1];
+          moveToPoint(tempx, tempy);
+        }   
+        // turn off batter
+        
         Serial.println(x1); Serial.print('.');
-        Serial.println(y1); Serial.print('.');
-        Serial.println(x2); Serial.print('.');
-        Serial.println(y2); Serial.print('.');
+        //Serial.println(y1); Serial.print('.');
+        //Serial.println(x2); Serial.print('.');
+        //Serial.println(y2); Serial.print('.');
             
       }
       else if(c1 == "C"){
-        // do stuff for circle
+        int x1 = getValue(coordString, ',', 1).toInt();
+        int y1 = getValue(coordString, ',', 2).toInt();
+        int r = getValue(coordString, ',', 3).toInt();
+        x1 = map(x1, 0, 800, 0, 5600);
+        y1 = map(y1, 0, 600, 0, 2400);
+        // do something with circle coordinates
       }
       else{
-        //do nothing
+        //do nothing, not circle or line
       }
-      //Serial.println(NEXT_TOKEN);
+      // reset coordString for next set of coordinates
       coordString = "";
     } 
     
   }
-  /*
-  else{
-    Serial.println("Nothing received.");
-  }
-  */
-   delay(400);
-   //Serial.println(NEXT_TOKEN);
+   delay(100);
 }
 
 // from h-ttp://stackoverflow.com/questions/9072320/arduino-split-string-into-string-array
@@ -98,11 +107,14 @@ String getValue(String data, char separator, int index){
 }
 
 
+// store point in linePoints array
+// used in setLinePoints below
 void setPoint(int pointNum, int x, int y){
   linePoints[pointNum][0] = x;
   linePoints[pointNum][1] = y; 
 }
 
+// implementation of line-drawing algorithm
 void setLinePoints(int x0, int y0, int x1, int y1){
   int dx = x1-x0;
   numPoints = abs(x1-x0);
@@ -129,7 +141,7 @@ void setLinePoints(int x0, int y0, int x1, int y1){
   }
 }
 
-//rotate steps for xMotor
+//rotate steps for x-direction motor
 void rotateX(int steps, float spd){ 
   //rotate a specific number of microsteps (8 microsteps per step) - (negitive for reverse movement)
   //speed is any number from .01 -> 1 with 1 being fastest - Slower is stronger
@@ -149,6 +161,7 @@ void rotateX(int steps, float spd){
   } 
 } 
 
+// rotate steps for y-direction motor
 void rotateY(int steps, float spd){ 
   //rotate a specific number of microsteps (8 microsteps per step) - (negitive for reverse movement)
   //speed is any number from .01 -> 1 with 1 being fastest - Slower is stronger
@@ -168,15 +181,18 @@ void rotateY(int steps, float spd){
   } 
 } 
 
+// move to (x,y) based on current location
 void moveToPoint(int x, int y){
   int delX = x-batterX;
   int delY = y-batterY;
-  int xSpeed = .5; //range 0.01 slowest to 1 fastest
-  int ySpeed = .5; //range 0.01 slowest to 1 fastest
+  int xSpeed = .01; //range 0.01 slowest to 1 fastest
+  int ySpeed = .01; //range 0.01 slowest to 1 fastest
   if(delX != 0){
-    rotateX(delX,xSpeed);
+    rotateX(delX, xSpeed);
   }
   if(delY != 0){
-    rotateY(delY,ySpeed);
+    rotateY(delY, ySpeed);
   }  
+  batterX = x;
+  batterY = y;
 }
