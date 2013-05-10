@@ -52,18 +52,20 @@ void loop(){
         x2 = map(x2, 0, 800, 0, 5600);
         y2 = map(y2, 0, 600, 0, 2400);
         
-        setLinePoints(x1,y1,x2,y2); 
+        //setLinePoints(x1,y1,x2,y2); 
         // move to first point on line
-        moveToPoint(linePoints[0][0], linePoints[0][1]);
+        //moveToPoint(linePoints[0][0], linePoints[0][1]);
         // "turn on" batter
+        /*
         for(int k = 1; k < numPoints; k++){
           int tempx = linePoints[k][0];
           int tempy = linePoints[k][1];
           moveToPoint(tempx, tempy);
         }   
+        */
         // turn off batter
         
-        Serial.println(x1); Serial.print('.');
+        Serial.print(x1); Serial.print('.');
         //Serial.println(y1); Serial.print('.');
         //Serial.println(x2); Serial.print('.');
         //Serial.println(y2); Serial.print('.');

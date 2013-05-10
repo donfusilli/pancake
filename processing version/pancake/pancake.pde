@@ -40,7 +40,7 @@ ArrayList <Shape> shapes = new ArrayList <Shape>();
 Line currLine;
 Circle currCircle;
 
-boolean readyToSend = false;
+//boolean readyToSend = false;
 String response = null;
 
 interface Shape{
@@ -278,9 +278,11 @@ void draw(){
     currCircle.display();
   }
   
+  /*
   if(readyToSend){
     sendData();
   }
+  */
 
 }
 
@@ -314,7 +316,8 @@ void mousePressed(){
     clickedUndoBox = false;
     draw();
     println("sending data");
-    readyToSend = true;
+    //readyToSend = true;
+    sendData();
   }
   else if(overUndoBox && !clickedRunBox){
     //clickedUndoBox = !clickedUndoBox;
@@ -415,32 +418,44 @@ void mouseReleased(){
 }
 
 void sendData(){
+    println("starting the senddata method");
     Shape shape1 = shapes.get(0);
   
     if(shape1 != null){
+      println("shape is not null");
       port.write(shape1.getCordString());
+      println("cordstring written to port");
       while(port.available() <= 0);
-      response = port.readStringUntil(46);
+      println("got something back from arduino");
+      while(port.available() > 0){
+        response = port.readStringUntil(46);
+      }
+      println("read string until period");
       if(response != null){
         println(response);
       }
-      shapes.remove(0);
     }
-    /*
+ 
   for(int i=1; i<shapes.size(); i++){
     Shape s = shapes.get(i);
+    println("got shape "); print(i);
     if(s != null){
+      println("shape not null");
       port.write(s.getCordString());
+      println("cordstring writtent to port");
       while(port.available() <= 0);
-      response = port.readStringUntil(46);
+      println("received something from arduino");
+      while(port.available() > 0){
+        response = port.readStringUntil(46);
+      }
+      println("read string until period");
       if(response != null){
         println(response);
       }
-      //shapes.remove(i);
     }
   }
-  */
-  println("Done with shapes");
+  
+  println("***** DONE WITH SHAPES *****");
   clickedRunBox = false; 
   //readyToSend = false;
 }
