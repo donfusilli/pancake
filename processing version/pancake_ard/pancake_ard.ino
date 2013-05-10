@@ -2,6 +2,10 @@
 //const int DELIMITER = '.';
 //const int NEXT_TOKEN = 'N';
 
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+
 int numPoints;
 const int xDim = 5600; //total number of steps in x-direction (long)
 const int yDim = 2400; // total number of steps in y-direction (short)
@@ -27,7 +31,10 @@ void setup(){
   pinMode(STEP_PIN_X, OUTPUT); 
   pinMode(DIR_PIN_Y, OUTPUT); 
   pinMode(STEP_PIN_Y, OUTPUT);
-  
+  // attaches the servo on digital pin 7 to the servo object 
+  myservo.attach(7);
+  delay(1000);
+  myservo.write(0);
 }
 
 
@@ -56,6 +63,7 @@ void loop(){
         // move to first point on line
         //moveToPoint(linePoints[0][0], linePoints[0][1]);
         // "turn on" batter
+        myservo.write(180);
         /*
         for(int k = 1; k < numPoints; k++){
           int tempx = linePoints[k][0];
@@ -64,6 +72,7 @@ void loop(){
         }   
         */
         // turn off batter
+        myservo.write(0);
         
         Serial.print(x1); Serial.print('.');
         //Serial.println(y1); Serial.print('.');
