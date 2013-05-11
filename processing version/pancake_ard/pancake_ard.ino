@@ -26,12 +26,12 @@ int batterY = 0;
 String coordString;
 
 // pins for x-direction motor
-#define DIR_PIN_X 2
-#define STEP_PIN_X 3
+#define DIR_PIN_X 6
+#define STEP_PIN_X 7
 
 // pins for y-direction motor
-#define DIR_PIN_Y 6
-#define STEP_PIN_Y 7
+#define DIR_PIN_Y 2
+#define STEP_PIN_Y 3
 
 void setup(){
   Serial.begin(9600);
@@ -50,7 +50,7 @@ void loop(){
   if(Serial.available() > 0){
     // read next char in serial buffer
     char c = Serial.read();
-    Serial.println(c); Serial.print('.');
+    //Serial.println(c); Serial.print('.');
     coordString += c;
     
     // if we've reached the end of a coordinate string
@@ -83,7 +83,7 @@ void loop(){
         y1 = map(y1, 0, 600, 0, yDim);
         r = map(r, 0, 300, 0, 1000);
         
-        drawCircle();
+        drawCircle(x1, y1, r);
         
          Serial.print(x1); Serial.print('.');
       }
@@ -169,7 +169,7 @@ void drawLine(int x0, int y0, int x1, int y1){
 void drawCircle(int x, int y, int r){
   moveToPoint(x, y);
   myservo.write(180);
-  delay(5*r);
+  delay(500*r);
   myservo.write(0);
   delay(800);
 }
