@@ -1,4 +1,10 @@
-
+/*
+// Processing sketch for Pancake Machine
+// @author Don Carpenter
+// @author Melanie Kauffman
+// @author Cathy Lu
+//
+*/
 import processing.serial.*;
 Serial port;
 
@@ -40,14 +46,15 @@ ArrayList <Shape> shapes = new ArrayList <Shape>();
 Line currLine;
 Circle currCircle;
 
-//boolean readyToSend = false;
 String response = null;
 
+// SHAPE
 interface Shape{
   void display();
   String getCordString();
 }
 
+// LINE
 class Line implements Shape{
   int x1, y1, x2, y2;
  
@@ -81,6 +88,7 @@ class Line implements Shape{
   }
 }
 
+// CIRCLE
 class Circle implements Shape{
   int x1,y1,rad;
  
@@ -277,12 +285,6 @@ void draw(){
     currCircle.setRad(calculateRad(mouseX,mouseY));
     currCircle.display();
   }
-  
-  /*
-  if(readyToSend){
-    sendData();
-  }
-  */
 
 }
 
@@ -316,7 +318,6 @@ void mousePressed(){
     clickedUndoBox = false;
     draw();
     println("sending data");
-    //readyToSend = true;
     sendData();
   }
   else if(overUndoBox && !clickedRunBox){
@@ -456,8 +457,8 @@ void sendData(){
   }
   
   println("***** DONE WITH SHAPES *****");
-  clickedRunBox = false; 
-  //readyToSend = false;
+  port.write(42);
+  clickedRunBox = false;
 }
 
 int calculateRad(int x, int y){

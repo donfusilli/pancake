@@ -1,22 +1,35 @@
-
-//const int DELIMITER = '.';
-//const int NEXT_TOKEN = 'N';
-
+/*
+// Arduino sketch for Pancake Machine
+// @author Don Carpenter
+// @author Melanie Kauffman
+// @author Cathy Lu
+//
+*/
 #include <Servo.h>
 
-Servo myservo;  // create servo object to control a servo
+// create servo object
+Servo myservo;
 
-const int xDim = 4444; //total number of steps in x-direction (long)
-const int yDim = 2222; // total number of steps in y-direction (short)
+//total number of steps in x-direction (long)
+const int xDim = 4000; 
 
-int batterX = 0;; //x coordinate of batter dispenser
-int batterY = 0; //y coordinate of batter dispenser
-                         
+// total number of steps in y-direction (short)
+const int yDim = 2000;
+
+// x-coordinate of batter dispenser
+int batterX = 0;
+
+//y-coordinate of batter dispenser
+int batterY = 0; 
+
+// incoming coordinate string                   
 String coordString;
 
+// pins for x-direction motor
 #define DIR_PIN_X 2
 #define STEP_PIN_X 3
 
+// pins for y-direction motor
 #define DIR_PIN_Y 6
 #define STEP_PIN_Y 7
 
@@ -26,31 +39,28 @@ void setup(){
   pinMode(STEP_PIN_X, OUTPUT); 
   pinMode(DIR_PIN_Y, OUTPUT); 
   pinMode(STEP_PIN_Y, OUTPUT);
-  // attaches the servo on digital pin 7 to the servo object 
+  // attaches the servo on digital pin 9 to the servo object 
   myservo.attach(9);
-  delay(1000);
+  // put servo in batter-stopping position
   myservo.write(0);
 }
 
 
 void loop(){
-  //Serial.println("Another test");
   if(Serial.available() > 0){
-    //Serial.println("Got something.");
-    
+    // read next char in serial buffer
     char c = Serial.read();
     Serial.println(c); Serial.print('.');
     coordString += c;
-    //char c = '.';
-    //coordString = "L,100,100,200,200.";
     
+    // if we've reached the end of a coordinate string
     if(c == '.'){
-      //Serial.println("test");
+      // get first character (should be "L" or "C")
       String c1 = getValue(coordString, ',', 0);
+      
+      // LINE
       if(c1 == "L"){
-        // do stuff for line
         int x1 = getValue(coordString, ',', 1).toInt();
-        //Serial.println(x1);
         int y1 = getValue(coordString, ',', 2).toInt();
         int x2 = getValue(coordString, ',', 3).toInt();
         int y2 = getValue(coordString, ',', 4).toInt();
@@ -60,37 +70,36 @@ void loop(){
         y2 = map(y2, 0, 600, 0, yDim);
         
         drawLine(x1,y1,x2,y2); 
-        // move to first point on line
-        // "turn on" batter
-        //myservo.write(180);
-        
-        // turn off batter
-        //myservo.write(0);
     
         Serial.print(x1); Serial.print('.');
-        //Serial.println(y1); Serial.print('.');
-        //Serial.println(x2); Serial.print('.');
-        //Serial.println(y2); Serial.print('.');
-          
       }
+      
+      // CIRCLE
       else if(c1 == "C"){
         int x1 = getValue(coordString, ',', 1).toInt();
         int y1 = getValue(coordString, ',', 2).toInt();
         int r = getValue(coordString, ',', 3).toInt();
-        x1 = map(x1, 0, 800, 0, 5600);
-        y1 = map(y1, 0, 600, 0, 2400);
-        // do something with circle coordinates
+        x1 = map(x1, 0, 800, 0, xDim);
+        y1 = map(y1, 0, 600, 0, yDim);
+        r = map(r, 0, 300, 0, 1000);
+        
+        drawCircle();
+        
+         Serial.print(x1); Serial.print('.');
       }
       else{
         //do nothing, not circle or line
       }
       // reset coordString for next set of coordinates
       coordString = "";
-    } 
-    
+    }
+   else if(c == '*'){
+     moveToPoint(0,0);
+   } 
+   else{
+     // your mother was a hamster and your father smelled of elder berries
+   }
   }
-   moveToPoint(0,0);
-   //delay(100);
 }
 
 // from h-ttp://stackoverflow.com/questions/9072320/arduino-split-string-into-string-array
@@ -139,6 +148,7 @@ void drawLine(int x0, int y0, int x1, int y1){
   
   //turn on batter
   myservo.write(180);
+  delay(800);
   
   for (int x = minX+1; x<= maxX; x++){
       if(D > 0){
@@ -153,6 +163,15 @@ void drawLine(int x0, int y0, int x1, int y1){
   }
   //turn off batter
   myservo.write(0);
+  delay(800);
+}
+
+void drawCircle(int x, int y, int r){
+  moveToPoint(x, y);
+  myservo.write(180);
+  delay(5*r);
+  myservo.write(0);
+  delay(800);
 }
 
 //rotate steps for x-direction motor
