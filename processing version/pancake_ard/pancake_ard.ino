@@ -6,13 +6,8 @@
 
 Servo myservo;  // create servo object to control a servo
 
-int numPoints;
-const int xDim = 5600; //total number of steps in x-direction (long)
-const int yDim = 2400; // total number of steps in y-direction (short)
-
-int linePoints[xDim][2]; //first index is point number
-                         //second index: 0 = x, 1 = y of point
-                         //ONLY read spots after they have been written to. Otherwise they could contain garbage
+const int xDim = 4444; //total number of steps in x-direction (long)
+const int yDim = 2222; // total number of steps in y-direction (short)
 
 int batterX = 0;; //x coordinate of batter dispenser
 int batterY = 0; //y coordinate of batter dispenser
@@ -22,8 +17,8 @@ String coordString;
 #define DIR_PIN_X 2
 #define STEP_PIN_X 3
 
-#define DIR_PIN_Y 5
-#define STEP_PIN_Y 6
+#define DIR_PIN_Y 6
+#define STEP_PIN_Y 7
 
 void setup(){
   Serial.begin(9600);
@@ -32,53 +27,51 @@ void setup(){
   pinMode(DIR_PIN_Y, OUTPUT); 
   pinMode(STEP_PIN_Y, OUTPUT);
   // attaches the servo on digital pin 7 to the servo object 
-  myservo.attach(7);
+  myservo.attach(9);
   delay(1000);
   myservo.write(0);
 }
 
 
 void loop(){
+  //Serial.println("Another test");
   if(Serial.available() > 0){
     //Serial.println("Got something.");
     
     char c = Serial.read();
-    //Serial.println(c); Serial.print('.');
+    Serial.println(c); Serial.print('.');
     coordString += c;
+    //char c = '.';
+    //coordString = "L,100,100,200,200.";
     
     if(c == '.'){
+      //Serial.println("test");
       String c1 = getValue(coordString, ',', 0);
       if(c1 == "L"){
         // do stuff for line
         int x1 = getValue(coordString, ',', 1).toInt();
+        //Serial.println(x1);
         int y1 = getValue(coordString, ',', 2).toInt();
         int x2 = getValue(coordString, ',', 3).toInt();
         int y2 = getValue(coordString, ',', 4).toInt();
-        x1 = map(x1, 0, 800, 0, 5600);
-        y1 = map(y1, 0, 600, 0, 2400);
-        x2 = map(x2, 0, 800, 0, 5600);
-        y2 = map(y2, 0, 600, 0, 2400);
+        x1 = map(x1, 0, 800, 0, xDim);
+        y1 = map(y1, 0, 600, 0, yDim);
+        x2 = map(x2, 0, 800, 0, xDim);
+        y2 = map(y2, 0, 600, 0, yDim);
         
-        //setLinePoints(x1,y1,x2,y2); 
+        drawLine(x1,y1,x2,y2); 
         // move to first point on line
-        //moveToPoint(linePoints[0][0], linePoints[0][1]);
         // "turn on" batter
-        myservo.write(180);
-        /*
-        for(int k = 1; k < numPoints; k++){
-          int tempx = linePoints[k][0];
-          int tempy = linePoints[k][1];
-          moveToPoint(tempx, tempy);
-        }   
-        */
-        // turn off batter
-        myservo.write(0);
+        //myservo.write(180);
         
+        // turn off batter
+        //myservo.write(0);
+    
         Serial.print(x1); Serial.print('.');
         //Serial.println(y1); Serial.print('.');
         //Serial.println(x2); Serial.print('.');
         //Serial.println(y2); Serial.print('.');
-            
+          
       }
       else if(c1 == "C"){
         int x1 = getValue(coordString, ',', 1).toInt();
@@ -96,7 +89,8 @@ void loop(){
     } 
     
   }
-   delay(100);
+   moveToPoint(0,0);
+   //delay(100);
 }
 
 // from h-ttp://stackoverflow.com/questions/9072320/arduino-split-string-into-string-array
@@ -118,38 +112,47 @@ String getValue(String data, char separator, int index){
 }
 
 
-// store point in linePoints array
-// used in setLinePoints below
-void setPoint(int pointNum, int x, int y){
-  linePoints[pointNum][0] = x;
-  linePoints[pointNum][1] = y; 
-}
-
 // implementation of line-drawing algorithm
-void setLinePoints(int x0, int y0, int x1, int y1){
-  int dx = x1-x0;
-  numPoints = abs(x1-x0);
-  int dy = y1-y0;
- 
-  int D =  2*dy - dx;
-  setPoint(0,x0,y0);
-  int y = y0;
+void drawLine(int x0, int y0, int x1, int y1){
+  int minX,minY,maxX,maxY;
   
-  int pointNum = 1;
-  
-  for (int x = x0+1; x<= x1; x++){
-    if(D > 0){
-      y = y+1;
-      setPoint(pointNum,x,y);
-      D = D + (2*dy-2*dx);
-      pointNum++;
-    }
-    else{
-      setPoint(pointNum,x,y);
-      D = D + (2*dy);
-      pointNum++;
-    }  
+  if(x0 <= x1){
+    minX = x0;
+    minY = y0;
+    maxX = x1;
+    maxY = y1;
   }
+  else{
+    minX = x1;
+    minY = y1;
+    maxX = x0;
+    maxY = y0;  
+  }
+  
+  int dx = maxX-minX;
+  int dy = maxY-minY;
+  
+  //move to first point 
+  int D =  2*dy - dx;
+  moveToPoint(minX,minY);
+  int y = minY;
+  
+  //turn on batter
+  myservo.write(180);
+  
+  for (int x = minX+1; x<= maxX; x++){
+      if(D > 0){
+        y = y+1;
+        moveToPoint(x,y);
+        D = D + (2*dy-2*dx);
+      }
+      else{
+        moveToPoint(x,y);
+        D = D + (2*dy);
+      }  
+  }
+  //turn off batter
+  myservo.write(0);
 }
 
 //rotate steps for x-direction motor
@@ -196,11 +199,13 @@ void rotateY(int steps, float spd){
 void moveToPoint(int x, int y){
   int delX = x-batterX;
   int delY = y-batterY;
-  int xSpeed = .01; //range 0.01 slowest to 1 fastest
-  int ySpeed = .01; //range 0.01 slowest to 1 fastest
+  float xSpeed = .05; //range 0.01 slowest to 1 fastest
+  float ySpeed = .05; //range 0.01 slowest to 1 fastest
+  //Serial.println("delX " + String(delX));
   if(delX != 0){
     rotateX(delX, xSpeed);
   }
+  //Serial.println("delY " + String(delY));
   if(delY != 0){
     rotateY(delY, ySpeed);
   }  

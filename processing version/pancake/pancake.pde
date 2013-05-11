@@ -432,7 +432,7 @@ void sendData(){
       }
       println("read string until period");
       if(response != null){
-        println(response);
+        println("response: "+response);
       }
     }
  
@@ -450,7 +450,7 @@ void sendData(){
       }
       println("read string until period");
       if(response != null){
-        println(response);
+        println("Response: "+response);
       }
     }
   }
