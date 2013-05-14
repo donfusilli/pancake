@@ -43,6 +43,7 @@ void setup(){
   myservo.attach(9);
   // put servo in batter-stopping position
   myservo.write(0);
+  //myservo.write(180);
 }
 
 
@@ -169,7 +170,7 @@ void drawLine(int x0, int y0, int x1, int y1){
 void drawCircle(int x, int y, int r){
   moveToPoint(x, y);
   myservo.write(180);
-  delay(500*r);
+  delay(100*r);
   myservo.write(0);
   delay(800);
 }
